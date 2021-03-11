@@ -17,6 +17,30 @@ class SearchViewModel(
     private val searchRepository: SearchBookRepositoryImpl
 ) : ViewModel() {
 
+    val isLoading = MutableLiveData(false)
+
+    val isKeyboard = MutableLiveData(true)
+
+    val messageText = MutableLiveData("")
+
+    val isVisibleMessageText = MediatorLiveData<Boolean>().apply {
+        addSource(messageText) { message ->
+            postValue(TextUtils.isEmpty(message).not())
+        }
+    }
+
+    val editSearchText = MutableLiveData("")
+
+    val enableSearchButton = MediatorLiveData<Boolean>().apply {
+        addSource(editSearchText) { query ->
+            if (query.isNullOrEmpty()) {
+                postValue(false)
+            } else {
+                postValue(true)
+            }
+        }
+    }
+
     val focusedBookItem = MutableLiveData<BookItem>()
 
     val items = MutableLiveData<List<BookItem>>(emptyList())
@@ -69,30 +93,6 @@ class SearchViewModel(
 
     private fun clearItems() {
         items.postValue(emptyList())
-    }
-
-    val isLoading = MutableLiveData(false)
-
-    val isKeyboard = MutableLiveData(true)
-
-    val messageText = MutableLiveData("")
-
-    val isVisibleMessageText = MediatorLiveData<Boolean>().apply {
-        addSource(messageText) { message ->
-            postValue(TextUtils.isEmpty(message).not())
-        }
-    }
-
-    val editSearchText = MutableLiveData("")
-
-    val enableSearchButton = MediatorLiveData<Boolean>().apply {
-        addSource(editSearchText) { query ->
-            if (query.isNullOrEmpty()) {
-                postValue(false)
-            } else {
-                postValue(true)
-            }
-        }
     }
 
     fun showInitMessage(context: Context) {
