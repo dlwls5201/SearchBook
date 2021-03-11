@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="com.blackjin.searchbook.ui.SearchViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/white"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/fragment_side_padding"
+            android:paddingEnd="@dimen/fragment_side_padding">
+
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_alignParentStart="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/ic_arrow_back_24px" />
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_alignParentEnd="true"
+                android:src="@{model.focusedBookItem.like ? @drawable/ic_favorite_red : @drawable/ic_favorite_gray}"
+                tools:src="@drawable/ic_favorite_gray" />
+        </RelativeLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/fragment_side_padding">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:adjustViewBounds="true"
+                    bind:setImageUrl="@{model.focusedBookItem.thumbnail}"
+                    tools:background="@color/gray6"
+                    tools:layout_height="100dp" />
+
+                <TextView
+                    style="@style/TextStyle.Large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@{model.focusedBookItem.name}"
+                    android:textColor="@color/textColor"
+                    android:textStyle="bold"
+                    tools:text="책 이름" />
+
+                <TextView
+                    style="@style/TextStyle.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@{@string/book_price_format(model.focusedBookItem.price)}"
+                    android:textColor="@color/textColor"
+                    tools:text="기격" />
+
+                <TextView
+                    style="@style/TextStyle.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@{@string/book_date_format(model.focusedBookItem.date)}"
+                    android:textColor="@color/textColor"
+                    tools:text="출시일" />
+
+                <TextView
+                    style="@style/TextStyle.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@{@string/book_publisher_format(model.focusedBookItem.publisher)}"
+                    android:textColor="@color/textColor"
+                    tools:text="출판사" />
+
+                <TextView
+                    style="@style/TextStyle.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="3dp"
+                    android:textColor="@color/textColor"
+                    bind:setHtmlText="@{model.focusedBookItem.description}"
+                    tools:text="설명" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</layout>

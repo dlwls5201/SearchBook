@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="com.blackjin.searchbook.ui.SearchViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray9"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/fragment_side_padding"
+        android:paddingTop="@dimen/fragment_side_padding"
+        android:paddingEnd="@dimen/fragment_side_padding">
+
+        <EditText
+            android:id="@+id/et_search"
+            style="@style/EditTextStyle.NormalInputField"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:hint="@string/please_write_book_name"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:singleLine="true"
+            android:text="@={model.editSearchText}"
+            app:layout_constraintEnd_toStartOf="@+id/btn_search"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_search"
+            style="@style/ButtonStyle.Primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="@{model.enableSearchButton}"
+            android:onClick="@{() -> model.searchRepository(context)}"
+            android:text="@string/search"
+            app:layout_constraintBottom_toBottomOf="@+id/et_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/et_search"
+            app:layout_constraintTop_toTopOf="@+id/et_search" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_search_book"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_search"
+            tools:listitem="@layout/item_book" />
+
+        <ProgressBar
+            android:id="@+id/pb_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{model.isLoading}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_message"
+            style="@style/TextStyle.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:lineSpacingExtra="5dp"
+            android:text="@{model.messageText}"
+            android:textColor="@color/textColor"
+            android:textStyle="bold"
+            android:visibility="@{model.isVisibleMessageText}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="message"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

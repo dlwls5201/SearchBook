@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="android.text.TextUtils" />
+
+        <variable
+            name="item"
+            type="com.blackjin.searchbook.ui.model.BookItem" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:padding="@dimen/item_book_padding">
+
+        <ImageView
+            android:id="@+id/iv_book"
+            android:layout_width="78dp"
+            android:layout_height="78dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            bind:setImageUrl="@{item.thumbnail}"
+            tools:background="@color/gray6" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="90dp" />
+
+        <TextView
+            android:id="@+id/tv_book_name"
+            style="@style/TextStyle.Medium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:singleLine="true"
+            android:text="@{item.name}"
+            android:textColor="@color/textColor"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/tv_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_left"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="책 이름" />
+
+        <TextView
+            android:id="@+id/tv_description"
+            style="@style/TextStyle.Small"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@{item.description}"
+            android:textColor="@color/textColor"
+            android:visibility="@{TextUtils.isEmpty(item.description) ? View.GONE : View.VISIBLE}"
+            app:layout_constraintBottom_toTopOf="@id/tv_book_price"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_left"
+            app:layout_constraintTop_toBottomOf="@id/tv_book_name"
+            tools:text="한 줄 설명 한 줄 설명 한 줄 설명 한 줄 설명 한 줄 설명 한 줄 설명 한 줄 설명 한 줄 설명" />
+
+        <TextView
+            android:id="@+id/tv_book_price"
+            style="@style/TextStyle.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/book_price_format(item.price)}"
+            android:textColor="@color/textColor"
+            app:layout_constraintBottom_toTopOf="@id/tv_book_date"
+            app:layout_constraintStart_toEndOf="@id/guideline_left"
+            app:layout_constraintTop_toBottomOf="@id/tv_description"
+            tools:text="책 가격" />
+
+        <TextView
+            android:id="@+id/tv_book_date"
+            style="@style/TextStyle.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/book_date_format(item.date)}"
+            android:textColor="@color/textColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_left"
+            app:layout_constraintTop_toBottomOf="@id/tv_book_price"
+            tools:text="출시일" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:src="@{item.isLike ? @drawable/ic_favorite_gray : @drawable/ic_favorite_gray}"
+            app:layout_constraintBottom_toBottomOf="@id/iv_book"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:src="@drawable/ic_favorite_red" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
