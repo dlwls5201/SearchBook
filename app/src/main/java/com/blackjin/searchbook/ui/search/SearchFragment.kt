@@ -1,13 +1,11 @@
 package com.blackjin.searchbook.ui.search
 
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +17,9 @@ import com.blackjin.searchbook.ui.MainActivity
 import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.search.adapter.BookAdapter
 import com.blackjin.searchbook.utils.AppUtils
+import com.blackjin.searchbook.utils.Dlog
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_search) {
 
@@ -49,8 +50,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         super.onViewCreated(view, savedInstanceState)
         binding.model = searchBookViewModel
         initRecyclerView()
-        initEditText()
-
         showInitMessage()
         showInitKeyboard()
     }
@@ -70,6 +69,15 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
                 }
             }
         })
+
+        lifecycleScope.launch {
+            searchBookViewModel.autoSearchText.collect {
+                Dlog.d("debounce : $it")
+                context?.let { _context ->
+                    searchBookViewModel.searchBooks(_context)
+                }
+            }
+        }
     }
 
     private fun initRecyclerView() {
@@ -94,24 +102,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
                 }
             })
         }
-    }
-
-    private fun initEditText() {
-        binding.etSearch.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                when (actionId) {
-                    EditorInfo.IME_ACTION_SEARCH -> {
-                        context?.let {
-                            searchBookViewModel.searchBooks(it)
-                        }
-                        return true
-                    }
-                    else -> {
-                        return false
-                    }
-                }
-            }
-        })
     }
 
     private fun showInitMessage() {

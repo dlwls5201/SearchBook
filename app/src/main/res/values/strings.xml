@@ -2,7 +2,6 @@
     <string name="app_name">SearchBook</string>
 
     <string name="please_write_book_name">책 이름을 입력하세요</string>
-    <string name="search">검색</string>
     <string name="book_price_format">가격: %d원</string>
     <string name="book_date_format">출시일: %s</string>
     <string name="book_publisher_format">출판사: %s</string>

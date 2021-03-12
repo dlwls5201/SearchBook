@@ -2,15 +2,13 @@ package com.blackjin.searchbook.ui
 
 import android.content.Context
 import android.text.TextUtils
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.blackjin.searchbook.R
 import com.blackjin.searchbook.data.repository.SearchBookRepository
 import com.blackjin.searchbook.ui.model.BookItem
 import com.blackjin.searchbook.utils.Dlog
 import com.example.toyproject.data.base.BaseResponse
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 class SearchBookViewModel(
@@ -30,16 +28,7 @@ class SearchBookViewModel(
     }
 
     val editSearchText = MutableLiveData("")
-
-    val enableSearchButton = MediatorLiveData<Boolean>().apply {
-        addSource(editSearchText) { query ->
-            if (query.isNullOrEmpty()) {
-                postValue(false)
-            } else {
-                postValue(true)
-            }
-        }
-    }
+    val autoSearchText = editSearchText.asFlow().debounce(1000L)
 
     val focusedBookItem = MutableLiveData<BookItem>()
 
@@ -52,18 +41,22 @@ class SearchBookViewModel(
     private var page = 1
 
     fun searchBooks(context: Context) {
-        hideKeyboard()
-        viewModelScope.launch {
-            val query = editSearchText.value ?: return@launch
-            initSearchFlag()
+        val query = editSearchText.value ?: return
+        if (TextUtils.isEmpty(query)) {
+            return
+        }
 
-            Dlog.d("page : $page, query : $query")
+        initSearchFlag()
+
+        Dlog.d("page : $page, query : $query")
+        viewModelScope.launch {
             searchRepository.searchBook(query, page, object : BaseResponse<Triple<Boolean, Int, List<BookItem>>> {
                 override fun onSuccess(data: Triple<Boolean, Int, List<BookItem>>) {
                     val (isEnd, totalCount, books) = data
                     if (totalCount == 0) {
                         clearItems()
                         showMessage(context.getString(R.string.not_search_result))
+                        showMessage("검색 결과가 없습니다.😢")
                         return
                     }
 
@@ -102,12 +95,17 @@ class SearchBookViewModel(
             return
         }
 
-        hideKeyboard()
-        viewModelScope.launch {
-            val query = editSearchText.value ?: return@launch
-            addPage()
 
-            Dlog.d("page : $page, query : $query")
+        val query = editSearchText.value ?: return
+        if (TextUtils.isEmpty(query)) {
+            return
+        }
+
+        hideKeyboard()
+        addPage()
+
+        Dlog.d("page : $page, query : $query")
+        viewModelScope.launch {
             searchRepository.searchBook(query, page, object : BaseResponse<Triple<Boolean, Int, List<BookItem>>> {
                 override fun onSuccess(data: Triple<Boolean, Int, List<BookItem>>) {
                     val (isEnd, totalCount, books) = data
