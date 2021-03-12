@@ -9,15 +9,16 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.blackjin.searchbook.R
 import com.blackjin.searchbook.base.BaseFragment
 import com.blackjin.searchbook.databinding.FragmentSearchBinding
 import com.blackjin.searchbook.injection.Injection
 import com.blackjin.searchbook.ui.MainActivity
-import com.blackjin.searchbook.ui.SearchViewModel
+import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.search.adapter.BookAdapter
 import com.blackjin.searchbook.utils.AppUtils
-import com.blackjin.searchbook.utils.Dlog
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_search) {
 
@@ -26,7 +27,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         fun newInstance() = SearchFragment()
     }
 
-    private val repoAdapter by lazy {
+    private val bookAdapter by lazy {
         BookAdapter().apply {
             onItemClick = { bookItem ->
                 (requireActivity() as MainActivity).goToDetailFragment(bookItem)
@@ -34,10 +35,10 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         }
     }
 
-    private val searchViewModel by activityViewModels<SearchViewModel> {
+    private val searchBookViewModel by activityViewModels<SearchBookViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return SearchViewModel(
+                return SearchBookViewModel(
                     Injection.provideSearchRepository()
                 ) as T
             }
@@ -46,19 +47,20 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.model = searchViewModel
-        Dlog.d("searchViewModel : $searchViewModel")
+        binding.model = searchBookViewModel
         initRecyclerView()
         initEditText()
+
         showInitMessage()
+        showInitKeyboard()
     }
 
     override fun onViewModelSetup() {
-        searchViewModel.items.observe(viewLifecycleOwner, {
-            repoAdapter.setItems(it)
+        searchBookViewModel.items.observe(viewLifecycleOwner, {
+            bookAdapter.replaceAll(it)
         })
 
-        searchViewModel.isKeyboard.observe(viewLifecycleOwner, { showKeyboard ->
+        searchBookViewModel.isKeyboard.observe(viewLifecycleOwner, { showKeyboard ->
             activity?.let { _activity ->
                 if (showKeyboard) {
                     binding.etSearch.requestFocus()
@@ -72,10 +74,25 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
 
     private fun initRecyclerView() {
         with(binding.listSearchBook) {
-            adapter = repoAdapter
+            adapter = bookAdapter
             addItemDecoration(
                 DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
             )
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (dy > 0) {
+                        val lm = recyclerView.layoutManager
+                        if (lm is LinearLayoutManager) {
+                            if (lm.findLastCompletelyVisibleItemPosition() ==
+                                recyclerView.adapter?.itemCount?.minus(1)
+                            ) {
+                                searchBookViewModel.addNextBooks()
+                            }
+                        }
+                    }
+                }
+            })
         }
     }
 
@@ -85,7 +102,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
                 when (actionId) {
                     EditorInfo.IME_ACTION_SEARCH -> {
                         context?.let {
-                            searchViewModel.searchRepository(it)
+                            searchBookViewModel.searchBooks(it)
                         }
                         return true
                     }
@@ -99,7 +116,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
 
     private fun showInitMessage() {
         context?.let {
-            searchViewModel.showInitMessage(it)
+            searchBookViewModel.showInitMessage(it)
         }
+    }
+
+    private fun showInitKeyboard() {
+        searchBookViewModel.showInitKeyboard()
     }
 }

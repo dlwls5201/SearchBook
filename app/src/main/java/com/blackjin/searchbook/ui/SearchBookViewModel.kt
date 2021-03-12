@@ -7,19 +7,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blackjin.searchbook.R
-import com.blackjin.searchbook.data.repository.SearchBookRepositoryImpl
+import com.blackjin.searchbook.data.repository.SearchBookRepository
 import com.blackjin.searchbook.ui.model.BookItem
 import com.blackjin.searchbook.utils.Dlog
 import com.example.toyproject.data.base.BaseResponse
 import kotlinx.coroutines.launch
 
-class SearchViewModel(
-    private val searchRepository: SearchBookRepositoryImpl
+class SearchBookViewModel(
+    private val searchRepository: SearchBookRepository
 ) : ViewModel() {
 
     val isLoading = MutableLiveData(false)
 
-    val isKeyboard = MutableLiveData(true)
+    val isKeyboard = MutableLiveData(false)
 
     val messageText = MutableLiveData("")
 
@@ -49,16 +49,18 @@ class SearchViewModel(
         focusedBookItem.postValue(bookItem)
     }
 
-    fun searchRepository(context: Context) {
-        hideKeyboard()
+    private var page = 1
 
+    fun searchBooks(context: Context) {
+        hideKeyboard()
         viewModelScope.launch {
             val query = editSearchText.value ?: return@launch
-            Dlog.d("query : $query")
+            initSearchFlag()
 
-            searchRepository.searchBook(query, object : BaseResponse<Pair<Int, List<BookItem>>> {
-                override fun onSuccess(data: Pair<Int, List<BookItem>>) {
-                    val (totalCount, books) = data
+            Dlog.d("page : $page, query : $query")
+            searchRepository.searchBook(query, page, object : BaseResponse<Triple<Boolean, Int, List<BookItem>>> {
+                override fun onSuccess(data: Triple<Boolean, Int, List<BookItem>>) {
+                    val (isEnd, totalCount, books) = data
                     if (totalCount == 0) {
                         clearItems()
                         showMessage(context.getString(R.string.not_search_result))
@@ -91,6 +93,69 @@ class SearchViewModel(
         }
     }
 
+    private var isLoadingFlag = false
+    private var isEndFlag = false
+
+    fun addNextBooks() {
+        Dlog.d("isEndFlag : $isEndFlag, isLoadingFlag : $isLoadingFlag")
+        if (isEndFlag || isLoadingFlag) {
+            return
+        }
+
+        hideKeyboard()
+        viewModelScope.launch {
+            val query = editSearchText.value ?: return@launch
+            addPage()
+
+            Dlog.d("page : $page, query : $query")
+            searchRepository.searchBook(query, page, object : BaseResponse<Triple<Boolean, Int, List<BookItem>>> {
+                override fun onSuccess(data: Triple<Boolean, Int, List<BookItem>>) {
+                    val (isEnd, totalCount, books) = data
+                    isEndFlag = isEnd
+                    if (isEnd) {
+                        Dlog.d("마지막 데이터 입니다.")
+                    } else {
+                        if (books.isNotEmpty()) {
+                            items.value?.let { preItems ->
+                                val totalItems = preItems.toMutableList().apply {
+                                    addAll(books)
+                                }
+                                items.postValue(totalItems)
+                            }
+                        }
+                    }
+                }
+
+                override fun onFail(description: String) {
+                    Dlog.e(description)
+                }
+
+                override fun onError(throwable: Throwable) {
+                    Dlog.e(throwable.message)
+                }
+
+                override fun onLoading() {
+                    isLoadingFlag = true
+                    showLoading()
+                }
+
+                override fun onLoaded() {
+                    isLoadingFlag = false
+                    hideLoading()
+                }
+            })
+        }
+    }
+
+    private fun initSearchFlag() {
+        isEndFlag = false
+        page = 1
+    }
+
+    private fun addPage() {
+        page++
+    }
+
     private fun clearItems() {
         items.postValue(emptyList())
     }
@@ -98,6 +163,12 @@ class SearchViewModel(
     fun showInitMessage(context: Context) {
         if (items.value?.isEmpty() == true) {
             messageText.postValue(context.getString(R.string.descriptive_search_message))
+        }
+    }
+
+    fun showInitKeyboard() {
+        if (items.value?.isEmpty() == true) {
+            isKeyboard.postValue(true)
         }
     }
 

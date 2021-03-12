@@ -7,7 +7,7 @@
 
         <variable
             name="model"
-            type="com.blackjin.searchbook.ui.SearchViewModel" />
+            type="com.blackjin.searchbook.ui.SearchBookViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="@{model.enableSearchButton}"
-            android:onClick="@{() -> model.searchRepository(context)}"
+            android:onClick="@{() -> model.searchBooks(context)}"
             android:text="@string/search"
             app:layout_constraintBottom_toBottomOf="@+id/et_search"
             app:layout_constraintEnd_toEndOf="parent"
@@ -51,6 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
+            android:scrollbars="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

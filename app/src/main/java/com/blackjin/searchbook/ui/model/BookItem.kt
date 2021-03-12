@@ -6,6 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class BookItem(
+    val id: Int = -1,
     val totalCount: Int = 0,
     val thumbnail: String = "",
     val name: String = "",
@@ -14,11 +15,18 @@ data class BookItem(
     val price: Int = 0,
     val date: String = "",
     val isLike: Boolean = false
-) : Parcelable
+) : Parcelable {
+
+    companion object {
+
+        fun getUniqueId(name: String, description: String) = (name + description).hashCode()
+    }
+}
 
 fun List<Document>.mapToItem() = map { it.mapToItem() }
 
 private fun Document.mapToItem() = BookItem(
+    id = BookItem.getUniqueId(title ?: "", contents ?: ""),
     thumbnail = thumbnail ?: "",
     name = title ?: "",
     description = contents ?: "",

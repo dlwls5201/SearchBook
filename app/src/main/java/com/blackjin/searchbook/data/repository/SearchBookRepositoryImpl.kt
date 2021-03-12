@@ -11,25 +11,30 @@ import retrofit2.HttpException
 
 class SearchBookRepositoryImpl(
     private val searchApi: SearchApi
-) {
+) : SearchBookRepository {
 
-    suspend fun searchBook(query: String, callback: BaseResponse<Pair<Int, List<BookItem>>>) {
+    companion object {
+
+        private const val SIZE = 50
+    }
+
+    override suspend fun searchBook(query: String, page: Int, callback: BaseResponse<Triple<Boolean, Int, List<BookItem>>>) {
         withContext(Dispatchers.Main) {
             try {
                 callback.onLoading()
                 withContext(Dispatchers.IO) {
                     val searchResponse = searchApi.searchBook(
                         query = query,
-                        page = 1,
-                        size = 50
+                        page = page,
+                        size = SIZE
                     )
 
-                    val isEnd = searchResponse.meta?.isEnd
+                    val isEnd = searchResponse.meta?.isEnd ?: true
                     val totalCount = searchResponse.meta?.totalCount ?: 0
-                    Dlog.d("isEnd : $isEnd")
+                    Dlog.d("isEnd : $isEnd, totalCount : $totalCount")
 
                     val items = searchResponse.documents.mapToItem()
-                    callback.onSuccess(Pair(totalCount, items))
+                    callback.onSuccess(Triple(isEnd, totalCount, items))
                 }
             } catch (e: Exception) {
                 if (e is HttpException) {

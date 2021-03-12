@@ -10,7 +10,7 @@ import com.blackjin.searchbook.R
 import com.blackjin.searchbook.base.BaseFragment
 import com.blackjin.searchbook.databinding.FragmentDetailBinding
 import com.blackjin.searchbook.injection.Injection
-import com.blackjin.searchbook.ui.SearchViewModel
+import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.model.BookItem
 import com.blackjin.searchbook.utils.Dlog
 
@@ -26,10 +26,10 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
             }
     }
 
-    private val searchViewModel by activityViewModels<SearchViewModel> {
+    private val searchViewModel by activityViewModels<SearchBookViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return SearchViewModel(
+                return SearchBookViewModel(
                     Injection.provideSearchRepository()
                 ) as T
             }

@@ -7,7 +7,7 @@
 
         <variable
             name="model"
-            type="com.blackjin.searchbook.ui.SearchViewModel" />
+            type="com.blackjin.searchbook.ui.SearchBookViewModel" />
     </data>
 
     <LinearLayout
