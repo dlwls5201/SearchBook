@@ -98,7 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:src="@{item.isLike ? @drawable/ic_favorite_gray : @drawable/ic_favorite_gray}"
+            android:src="@{item.isLike ? @drawable/ic_favorite_red : @drawable/ic_favorite_gray}"
             app:layout_constraintBottom_toBottomOf="@id/iv_book"
             app:layout_constraintEnd_toEndOf="parent"
             tools:src="@drawable/ic_favorite_red" />

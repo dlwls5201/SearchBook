@@ -29,8 +29,7 @@ object AppUtils {
 
     fun hideSoftKeyBoard(fragmentActivity: FragmentActivity) {
         val view = fragmentActivity.currentFocus
-        val imm =
-            fragmentActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = fragmentActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(fragmentActivity.currentFocus?.windowToken, 0)
         view?.clearFocus()
     }

@@ -5,7 +5,6 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,8 +17,6 @@ import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.search.adapter.BookAdapter
 import com.blackjin.searchbook.utils.AppUtils
 import com.blackjin.searchbook.utils.Dlog
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_search) {
 
@@ -55,7 +52,8 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
     }
 
     override fun onViewModelSetup() {
-        searchBookViewModel.items.observe(viewLifecycleOwner, {
+        searchBookViewModel.bookItemsData.observe(viewLifecycleOwner, {
+            Dlog.d("$it")
             bookAdapter.replaceAll(it)
         })
 
@@ -69,15 +67,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
                 }
             }
         })
-
-        lifecycleScope.launch {
-            searchBookViewModel.autoSearchText.collect {
-                Dlog.d("debounce : $it")
-                context?.let { _context ->
-                    searchBookViewModel.searchBooks(_context)
-                }
-            }
-        }
     }
 
     private fun initRecyclerView() {
@@ -105,9 +94,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
     }
 
     private fun showInitMessage() {
-        context?.let {
-            searchBookViewModel.showInitMessage(it)
-        }
+        searchBookViewModel.showInitMessage()
     }
 
     private fun showInitKeyboard() {

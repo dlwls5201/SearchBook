@@ -1,13 +1,12 @@
 package com.blackjin.searchbook.ui
 
-import android.content.Context
 import android.text.TextUtils
 import androidx.lifecycle.*
-import com.blackjin.searchbook.R
 import com.blackjin.searchbook.data.repository.SearchBookRepository
 import com.blackjin.searchbook.ui.model.BookItem
 import com.blackjin.searchbook.utils.Dlog
 import com.example.toyproject.data.base.BaseResponse
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
@@ -30,17 +29,26 @@ class SearchBookViewModel(
     val editSearchText = MutableLiveData("")
     val autoSearchText = editSearchText.asFlow().debounce(1000L)
 
-    val focusedBookItem = MutableLiveData<BookItem>()
+    val focusedBookItemData = MutableLiveData<BookItem>()
 
-    val items = MutableLiveData<List<BookItem>>(emptyList())
+    val bookItemsData = MutableLiveData<List<BookItem>>(emptyList())
 
     fun showBookItem(bookItem: BookItem) {
-        focusedBookItem.postValue(bookItem)
+        focusedBookItemData.postValue(bookItem)
     }
 
     private var page = 1
 
-    fun searchBooks(context: Context) {
+    init {
+        viewModelScope.launch {
+            autoSearchText.collect {
+                Dlog.d("debounce : $it")
+                searchBooks()
+            }
+        }
+    }
+
+    private fun searchBooks() {
         val query = editSearchText.value ?: return
         if (TextUtils.isEmpty(query)) {
             return
@@ -55,13 +63,13 @@ class SearchBookViewModel(
                     val (isEnd, totalCount, books) = data
                     if (totalCount == 0) {
                         clearItems()
-                        showMessage(context.getString(R.string.not_search_result))
+                        //showMessage(context.getString(R.string.not_search_result))
                         showMessage("검색 결과가 없습니다.😢")
                         return
                     }
 
                     if (books.isNotEmpty()) {
-                        items.postValue(books)
+                        bookItemsData.postValue(books)
                     }
                 }
 
@@ -114,11 +122,11 @@ class SearchBookViewModel(
                         Dlog.d("마지막 데이터 입니다.")
                     } else {
                         if (books.isNotEmpty()) {
-                            items.value?.let { preItems ->
+                            bookItemsData.value?.let { preItems ->
                                 val totalItems = preItems.toMutableList().apply {
                                     addAll(books)
                                 }
-                                items.postValue(totalItems)
+                                bookItemsData.postValue(totalItems)
                             }
                         }
                     }
@@ -145,6 +153,24 @@ class SearchBookViewModel(
         }
     }
 
+    fun changeLikeFocusedItem() {
+        val bookItems = bookItemsData.value?.toMutableList() ?: return
+        val focusedBookItem = focusedBookItemData.value ?: return
+
+        val isLike = focusedBookItem.isLike
+        val changedBookItem = focusedBookItem.copy(isLike = isLike.not())
+
+        bookItems.forEachIndexed { index, bookItem ->
+            if (changedBookItem.id == bookItem.id) {
+                bookItems[index] = changedBookItem
+                return@forEachIndexed
+            }
+        }
+
+        bookItemsData.postValue(bookItems)
+        focusedBookItemData.postValue(changedBookItem)
+    }
+
     private fun initSearchFlag() {
         isEndFlag = false
         page = 1
@@ -155,17 +181,18 @@ class SearchBookViewModel(
     }
 
     private fun clearItems() {
-        items.postValue(emptyList())
+        bookItemsData.postValue(emptyList())
     }
 
-    fun showInitMessage(context: Context) {
-        if (items.value?.isEmpty() == true) {
-            messageText.postValue(context.getString(R.string.descriptive_search_message))
+    fun showInitMessage() {
+        if (bookItemsData.value?.isEmpty() == true) {
+            //messageText.postValue(context.getString(R.string.descriptive_search_message))
+            messageText.postValue("책 이름을 입력하면 자동으로\n검색이 됩니다.😽")
         }
     }
 
     fun showInitKeyboard() {
-        if (items.value?.isEmpty() == true) {
+        if (bookItemsData.value?.isEmpty() == true) {
             isKeyboard.postValue(true)
         }
     }
