@@ -1,6 +1,6 @@
 package com.blackjin.searchbook.data.repository
 
-import com.blackjin.searchbook.data.source.remote.SearchApi
+import com.blackjin.searchbook.data.api.SearchApi
 import com.blackjin.searchbook.ui.model.BookItem
 import com.blackjin.searchbook.ui.model.mapToItem
 import com.blackjin.searchbook.utils.Dlog
@@ -16,6 +16,8 @@ class SearchBookRepositoryImpl(
     companion object {
 
         private const val SIZE = 50
+
+        private const val TARGET = "title"
     }
 
     override suspend fun searchBook(query: String, page: Int, callback: BaseResponse<Triple<Boolean, Int, List<BookItem>>>) {
@@ -24,6 +26,7 @@ class SearchBookRepositoryImpl(
                 callback.onLoading()
                 withContext(Dispatchers.IO) {
                     val searchResponse = searchApi.searchBook(
+                        target = TARGET,
                         query = query,
                         page = page,
                         size = SIZE

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.blackjin.searchbook.R
@@ -18,7 +19,7 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
 
     companion object {
 
-        private const val ARGUMENT_BOOK_ITEM = "book_item"
+        const val ARGUMENT_BOOK_ITEM = "book_item"
 
         fun newInstance(bookItem: BookItem) = DetailFragment()
             .apply {
@@ -36,19 +37,21 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
         }
     }
 
+    private val detailViewModel by viewModels<DetailViewModel>()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.model = searchViewModel
-        checkAndShowBookItem()
+        binding.model = detailViewModel
         initButton()
     }
 
-    private fun checkAndShowBookItem() {
-        val bookItem = arguments?.getParcelable<BookItem>(ARGUMENT_BOOK_ITEM)
-            ?: error("bookItem must not be null")
+    override fun onViewModelSetup() {
+        super.onViewModelSetup()
 
-        Dlog.d("BookItem : ${bookItem.name}")
-        searchViewModel.showBookItem(bookItem)
+        detailViewModel.eventChangedBookItem.observe(viewLifecycleOwner, {
+            Dlog.d("item : ${it.name}'s like ${it.isLike}}")
+            searchViewModel.changeBookItem(it)
+        })
     }
 
     private fun initButton() {

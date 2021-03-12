@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.blackjin.searchbook.data.repository.SearchBookRepository
 import com.blackjin.searchbook.ui.model.BookItem
 import com.blackjin.searchbook.utils.Dlog
+import com.blackjin.searchbook.utils.Event
 import com.example.toyproject.data.base.BaseResponse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
@@ -14,70 +15,73 @@ class SearchBookViewModel(
     private val searchRepository: SearchBookRepository
 ) : ViewModel() {
 
-    val isLoading = MutableLiveData(false)
-
-    val isKeyboard = MutableLiveData(false)
-
-    val messageText = MutableLiveData("")
-
-    val isVisibleMessageText = MediatorLiveData<Boolean>().apply {
-        addSource(messageText) { message ->
+    val eventToast = MutableLiveData<Event<String>>()
+    val eventShowKeyboard = MutableLiveData(Event(false))
+    val eventIsLoading = MutableLiveData(false)
+    val eventShowMessageText = MutableLiveData("")
+    val eventIsVisibleMessageText = MediatorLiveData<Boolean>().apply {
+        addSource(eventShowMessageText) { message ->
             postValue(TextUtils.isEmpty(message).not())
         }
     }
 
-    val editSearchText = MutableLiveData("")
-    val autoSearchText = editSearchText.asFlow().debounce(1000L)
+    val eventEditSearchText = MutableLiveData("")
+    val eventTotalCount = MutableLiveData(0)
 
-    val focusedBookItemData = MutableLiveData<BookItem>()
+    val eventBooks = MutableLiveData<List<BookItem>>(emptyList())
+    private val mutableBooks = mutableListOf<BookItem>()
 
-    val bookItemsData = MutableLiveData<List<BookItem>>(emptyList())
+    init {
+        showKeyboard()
+        initAutoSearch()
+    }
 
-    fun showBookItem(bookItem: BookItem) {
-        focusedBookItemData.postValue(bookItem)
+    private fun initAutoSearch() {
+        viewModelScope.launch {
+            eventEditSearchText.asFlow()
+                .debounce(1000L).collect {
+                    Dlog.d("debounce : $it")
+                    searchBooks()
+                }
+        }
     }
 
     private var page = 1
-
-    init {
-        viewModelScope.launch {
-            autoSearchText.collect {
-                Dlog.d("debounce : $it")
-                searchBooks()
-            }
-        }
-    }
+    private var isLoadingFlag = false
+    private var isEndFlag = false
 
     private fun searchBooks() {
-        val query = editSearchText.value ?: return
+        val query = eventEditSearchText.value ?: return
         if (TextUtils.isEmpty(query)) {
+            showInitMessage()
             return
         }
 
-        initSearchFlag()
+        initFlag()
 
         Dlog.d("page : $page, query : $query")
         viewModelScope.launch {
             searchRepository.searchBook(query, page, object : BaseResponse<Triple<Boolean, Int, List<BookItem>>> {
                 override fun onSuccess(data: Triple<Boolean, Int, List<BookItem>>) {
+
                     val (isEnd, totalCount, books) = data
                     if (totalCount == 0) {
                         clearItems()
-                        //showMessage(context.getString(R.string.not_search_result))
                         showMessage("검색 결과가 없습니다.😢")
                         return
                     }
 
-                    if (books.isNotEmpty()) {
-                        bookItemsData.postValue(books)
-                    }
+                    showTotalCount(totalCount)
+                    addAndPostBooks(books)
                 }
 
                 override fun onFail(description: String) {
+                    clearItems()
                     showMessage(description)
                 }
 
                 override fun onError(throwable: Throwable) {
+                    clearItems()
                     showMessage(throwable.message ?: "")
                 }
 
@@ -94,24 +98,18 @@ class SearchBookViewModel(
         }
     }
 
-    private var isLoadingFlag = false
-    private var isEndFlag = false
-
     fun addNextBooks() {
         Dlog.d("isEndFlag : $isEndFlag, isLoadingFlag : $isLoadingFlag")
         if (isEndFlag || isLoadingFlag) {
             return
         }
 
-
-        val query = editSearchText.value ?: return
+        val query = eventEditSearchText.value ?: return
         if (TextUtils.isEmpty(query)) {
             return
         }
 
-        hideKeyboard()
-        addPage()
-
+        plusPageCount()
         Dlog.d("page : $page, query : $query")
         viewModelScope.launch {
             searchRepository.searchBook(query, page, object : BaseResponse<Triple<Boolean, Int, List<BookItem>>> {
@@ -119,101 +117,106 @@ class SearchBookViewModel(
                     val (isEnd, totalCount, books) = data
                     isEndFlag = isEnd
                     if (isEnd) {
-                        Dlog.d("마지막 데이터 입니다.")
+                        showToast("마지막 데이터 입니다.")
                     } else {
-                        if (books.isNotEmpty()) {
-                            bookItemsData.value?.let { preItems ->
-                                val totalItems = preItems.toMutableList().apply {
-                                    addAll(books)
-                                }
-                                bookItemsData.postValue(totalItems)
-                            }
-                        }
+                        addAndPostBooks(books)
                     }
                 }
 
                 override fun onFail(description: String) {
                     Dlog.e(description)
+                    showToast(description)
                 }
 
                 override fun onError(throwable: Throwable) {
                     Dlog.e(throwable.message)
+                    showToast(throwable.message)
                 }
 
                 override fun onLoading() {
-                    isLoadingFlag = true
                     showLoading()
                 }
 
                 override fun onLoaded() {
-                    isLoadingFlag = false
                     hideLoading()
                 }
             })
         }
     }
 
-    fun changeLikeFocusedItem() {
-        val bookItems = bookItemsData.value?.toMutableList() ?: return
-        val focusedBookItem = focusedBookItemData.value ?: return
-
-        val isLike = focusedBookItem.isLike
-        val changedBookItem = focusedBookItem.copy(isLike = isLike.not())
-
-        bookItems.forEachIndexed { index, bookItem ->
-            if (changedBookItem.id == bookItem.id) {
-                bookItems[index] = changedBookItem
+    fun changeBookItem(item: BookItem) {
+        mutableBooks.forEachIndexed { index, bookItem ->
+            if (item.id == bookItem.id) {
+                mutableBooks[index] = item
                 return@forEachIndexed
             }
         }
-
-        bookItemsData.postValue(bookItems)
-        focusedBookItemData.postValue(changedBookItem)
+        eventBooks.postValue(mutableBooks)
     }
 
-    private fun initSearchFlag() {
-        isEndFlag = false
+    private fun initFlag() {
         page = 1
+        isLoadingFlag = false
+        isEndFlag = false
     }
 
-    private fun addPage() {
+    private fun plusPageCount() {
         page++
     }
 
+    private fun addAndPostBooks(books: List<BookItem>) {
+        if (books.isNotEmpty()) {
+            mutableBooks.addAll(books)
+            eventBooks.postValue(mutableBooks)
+        }
+    }
+
     private fun clearItems() {
-        bookItemsData.postValue(emptyList())
+        showTotalCount(0)
+        mutableBooks.clear()
+        eventBooks.postValue(emptyList())
     }
 
-    fun showInitMessage() {
-        if (bookItemsData.value?.isEmpty() == true) {
-            //messageText.postValue(context.getString(R.string.descriptive_search_message))
-            messageText.postValue("책 이름을 입력하면 자동으로\n검색이 됩니다.😽")
+    private fun showInitMessage() {
+        if (eventBooks.value?.isEmpty() == true) {
+            eventShowMessageText.postValue("책 이름을 입력하면 자동으로\n검색이 됩니다.😽")
         }
     }
 
-    fun showInitKeyboard() {
-        if (bookItemsData.value?.isEmpty() == true) {
-            isKeyboard.postValue(true)
+    private fun showToast(message: String?) {
+        if (TextUtils.isEmpty(message)) {
+            return
         }
+        eventToast.postValue(Event(message!!))
+    }
+
+    private fun showTotalCount(count: Int) {
+        eventTotalCount.postValue(count)
     }
 
     private fun showLoading() {
-        isLoading.postValue(true)
+        isLoadingFlag = true
+        eventIsLoading.postValue(true)
     }
 
     private fun hideLoading() {
-        isLoading.postValue(false)
+        isLoadingFlag = false
+        eventIsLoading.postValue(false)
+    }
+
+    private fun showKeyboard() {
+        eventShowKeyboard.postValue(Event(true))
     }
 
     private fun hideKeyboard() {
-        isKeyboard.postValue(false)
+        eventShowKeyboard.postValue(Event(false))
     }
 
     private fun showMessage(message: String) {
-        messageText.postValue(message)
+        eventShowMessageText.postValue(message)
     }
 
     private fun hideMessage() {
-        messageText.postValue("")
+        eventShowMessageText.postValue("")
     }
 }

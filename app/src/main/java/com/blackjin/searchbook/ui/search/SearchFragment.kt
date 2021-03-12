@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.blackjin.searchbook.R
 import com.blackjin.searchbook.base.BaseFragment
 import com.blackjin.searchbook.databinding.FragmentSearchBinding
+import com.blackjin.searchbook.ext.toast
 import com.blackjin.searchbook.injection.Injection
 import com.blackjin.searchbook.ui.MainActivity
 import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.search.adapter.BookAdapter
 import com.blackjin.searchbook.utils.AppUtils
-import com.blackjin.searchbook.utils.Dlog
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_search) {
 
@@ -29,6 +29,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         BookAdapter().apply {
             onItemClick = { bookItem ->
                 (requireActivity() as MainActivity).goToDetailFragment(bookItem)
+                hideSearchKeyboard()
             }
         }
     }
@@ -47,24 +48,26 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         super.onViewCreated(view, savedInstanceState)
         binding.model = searchBookViewModel
         initRecyclerView()
-        showInitMessage()
-        showInitKeyboard()
     }
 
     override fun onViewModelSetup() {
-        searchBookViewModel.bookItemsData.observe(viewLifecycleOwner, {
-            Dlog.d("$it")
+        searchBookViewModel.eventBooks.observe(viewLifecycleOwner, {
             bookAdapter.replaceAll(it)
         })
 
-        searchBookViewModel.isKeyboard.observe(viewLifecycleOwner, { showKeyboard ->
-            activity?.let { _activity ->
-                if (showKeyboard) {
-                    binding.etSearch.requestFocus()
-                    AppUtils.showSoftKeyBoard(_activity)
+        searchBookViewModel.eventShowKeyboard.observe(viewLifecycleOwner, {
+            it.getContentIfNotHandled()?.let { isShowKeyboard ->
+                if (isShowKeyboard) {
+                    showSearchKeyboard()
                 } else {
-                    AppUtils.hideSoftKeyBoard(_activity)
+                    hideSearchKeyboard()
                 }
+            }
+        })
+
+        searchBookViewModel.eventToast.observe(viewLifecycleOwner, {
+            it.getContentIfNotHandled()?.let { message ->
+                toast(message)
             }
         })
     }
@@ -93,11 +96,17 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         }
     }
 
-    private fun showInitMessage() {
-        searchBookViewModel.showInitMessage()
+    private fun showSearchKeyboard() {
+        activity?.let { _activity ->
+            binding.etSearch.requestFocus()
+            AppUtils.showSoftKeyBoard(_activity)
+        }
     }
 
-    private fun showInitKeyboard() {
-        searchBookViewModel.showInitKeyboard()
+    private fun hideSearchKeyboard() {
+        activity?.let { _activity ->
+            AppUtils.hideSoftKeyBoard(_activity)
+        }
     }
+
 }

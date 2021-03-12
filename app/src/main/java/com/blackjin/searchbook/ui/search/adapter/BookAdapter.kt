@@ -2,49 +2,68 @@ package com.blackjin.searchbook.ui.search.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.blackjin.searchbook.R
 import com.blackjin.searchbook.base.BaseViewHolder
 import com.blackjin.searchbook.databinding.ItemBookBinding
 import com.blackjin.searchbook.ui.model.BookItem
+import com.blackjin.searchbook.utils.Dlog
 
-class BookAdapter : ListAdapter<BookItem, BookAdapter.BookViewHolder>(BookDiffUtilCallback()) {
+class BookAdapter : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
     var onItemClick: ((repoItem: BookItem) -> Unit)? = null
+
+    private val items = mutableListOf<BookItem>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         BookViewHolder(parent).apply {
             itemView.setOnClickListener {
-                //TODO check adapter position deprecated
-                onItemClick?.invoke(currentList[adapterPosition])
+                //TODO check layoutPosition
+                onItemClick?.invoke(items[layoutPosition])
             }
         }
 
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
-        holder.bind(currentList[position])
+        holder.bind(items[position])
     }
 
-    override fun getItemCount() = currentList.size
+    override fun getItemCount() = items.size
 
     fun replaceAll(items: List<BookItem>) {
-        submitList(items)
+        Dlog.d("size : ${items.size} -> $items")
+
+        val diffCallback = BookDiffUtilCallback(this.items, items)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        this.items.run {
+            clear()
+            addAll(items)
+        }
+
+        diffResult.dispatchUpdatesTo(this)
     }
 
     class BookViewHolder(parent: ViewGroup) : BaseViewHolder<ItemBookBinding, BookItem>(
         parent, R.layout.item_book
     ) {
-
         override fun bind(data: BookItem) {
             binding?.item = data
         }
     }
 
-    class BookDiffUtilCallback : DiffUtil.ItemCallback<BookItem>() {
+    //TODO check diffUtil
+    class BookDiffUtilCallback(
+        private val oldList: List<BookItem>, private val newList: List<BookItem>
+    ) : DiffUtil.Callback() {
 
-        override fun areItemsTheSame(oldItem: BookItem, newItem: BookItem) =
-            oldItem.id == newItem.id
+        override fun getOldListSize() = oldList.size
 
-        override fun areContentsTheSame(oldItem: BookItem, newItem: BookItem) =
-            oldItem == newItem
+        override fun getNewListSize() = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition].id == newList[newItemPosition].id
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition] == newList[newItemPosition]
     }
 }

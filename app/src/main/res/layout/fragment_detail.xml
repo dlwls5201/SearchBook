@@ -7,7 +7,7 @@
 
         <variable
             name="model"
-            type="com.blackjin.searchbook.ui.SearchBookViewModel" />
+            type="com.blackjin.searchbook.ui.detail.DetailViewModel" />
     </data>
 
     <LinearLayout
@@ -37,8 +37,8 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:layout_alignParentEnd="true"
-                android:onClick="@{() -> model.changeLikeFocusedItem()}"
-                android:src="@{model.focusedBookItemData.like ? @drawable/ic_favorite_red : @drawable/ic_favorite_gray}"
+                android:onClick="@{() -> model.changeLike()}"
+                android:src="@{model.eventLike ? @drawable/ic_favorite_red : @drawable/ic_favorite_gray}"
                 tools:src="@drawable/ic_favorite_gray" />
         </RelativeLayout>
 
@@ -57,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:adjustViewBounds="true"
-                    bind:setImageUrl="@{model.focusedBookItemData.thumbnail}"
+                    bind:setImageUrl="@{model.bookItem.thumbnail}"
                     tools:background="@color/gray6"
                     tools:layout_height="100dp" />
 
@@ -66,7 +66,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="@{model.focusedBookItemData.name}"
+                    android:text="@{model.bookItem.name}"
                     android:textColor="@color/textColor"
                     android:textStyle="bold"
                     tools:text="책 이름" />
@@ -76,7 +76,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="@{@string/book_price_format(model.focusedBookItemData.price)}"
+                    android:text="@{@string/book_price_format(model.bookItem.price)}"
                     android:textColor="@color/textColor"
                     tools:text="기격" />
 
@@ -85,7 +85,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="@{@string/book_date_format(model.focusedBookItemData.date)}"
+                    android:text="@{@string/book_date_format(model.bookItem.date)}"
                     android:textColor="@color/textColor"
                     tools:text="출시일" />
 
@@ -94,7 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="@{@string/book_publisher_format(model.focusedBookItemData.publisher)}"
+                    android:text="@{@string/book_publisher_format(model.bookItem.publisher)}"
                     android:textColor="@color/textColor"
                     tools:text="출판사" />
 
@@ -105,7 +105,7 @@
                     android:layout_marginTop="10dp"
                     android:lineSpacingExtra="3dp"
                     android:textColor="@color/textColor"
-                    bind:setHtmlText="@{model.focusedBookItemData.description}"
+                    bind:setHtmlText="@{model.bookItem.description}"
                     tools:text="설명" />
             </LinearLayout>
         </ScrollView>

@@ -1,7 +1,7 @@
 package com.blackjin.searchbook.data
 
 import com.blackjin.searchbook.BuildConfig
-import com.blackjin.searchbook.data.source.remote.SearchApi
+import com.blackjin.searchbook.data.api.SearchApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
