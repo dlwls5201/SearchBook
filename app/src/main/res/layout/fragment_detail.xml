@@ -38,7 +38,7 @@
                 android:layout_height="45dp"
                 android:layout_alignParentEnd="true"
                 android:onClick="@{() -> model.changeLike()}"
-                android:src="@{model.eventLike ? @drawable/ic_favorite_red : @drawable/ic_favorite_gray}"
+                android:src="@{model.isLike ? @drawable/ic_favorite_red : @drawable/ic_favorite_gray}"
                 tools:src="@drawable/ic_favorite_gray" />
         </RelativeLayout>
 

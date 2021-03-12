@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.blackjin.searchbook.ui.model.BookItem
 
+//TODO check SavedStateHandle
 //https://pluu.github.io/blog/android/2020/02/20/savedstatehandle/
 class DetailViewModel(
     handle: SavedStateHandle
@@ -13,15 +14,15 @@ class DetailViewModel(
 
     val bookItem: BookItem = handle[DetailFragment.ARGUMENT_BOOK_ITEM] ?: BookItem()
 
-    val eventLike = MutableLiveData(bookItem.isLike)
-    val eventChangedBookItem = MediatorLiveData<BookItem>().apply {
-        addSource(eventLike) {
+    val isLike = MutableLiveData(bookItem.isLike)
+    val changedBookItem = MediatorLiveData<BookItem>().apply {
+        addSource(isLike) {
             postValue(bookItem.copy(isLike = it))
         }
     }
 
     fun changeLike() {
-        val currentLike = eventLike.value ?: false
-        eventLike.postValue(currentLike.not())
+        val currentLike = isLike.value ?: false
+        isLike.postValue(currentLike.not())
     }
 }

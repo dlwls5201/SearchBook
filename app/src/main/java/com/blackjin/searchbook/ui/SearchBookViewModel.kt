@@ -16,11 +16,12 @@ class SearchBookViewModel(
 ) : ViewModel() {
 
     val eventToast = MutableLiveData<Event<String>>()
-    val eventShowKeyboard = MutableLiveData(Event(false))
-    val eventIsLoading = MutableLiveData(false)
-    val eventShowMessageText = MutableLiveData("")
-    val eventIsVisibleMessageText = MediatorLiveData<Boolean>().apply {
-        addSource(eventShowMessageText) { message ->
+    val eventShowKeyboard = MutableLiveData<Event<Boolean>>()
+
+    val showLoading = MutableLiveData(false)
+    val showMessageText = MutableLiveData("")
+    val isVisibleMessageText = MediatorLiveData<Boolean>().apply {
+        addSource(showMessageText) { message ->
             postValue(TextUtils.isEmpty(message).not())
         }
     }
@@ -179,7 +180,7 @@ class SearchBookViewModel(
 
     private fun showInitMessage() {
         if (eventBooks.value?.isEmpty() == true) {
-            eventShowMessageText.postValue("책 이름을 입력하면 자동으로\n검색이 됩니다.😽")
+            showMessageText.postValue("책 이름을 입력하면 자동으로\n검색이 됩니다.😽")
         }
     }
 
@@ -196,12 +197,12 @@ class SearchBookViewModel(
 
     private fun showLoading() {
         isLoadingFlag = true
-        eventIsLoading.postValue(true)
+        showLoading.postValue(true)
     }
 
     private fun hideLoading() {
         isLoadingFlag = false
-        eventIsLoading.postValue(false)
+        showLoading.postValue(false)
     }
 
     private fun showKeyboard() {
@@ -213,10 +214,10 @@ class SearchBookViewModel(
     }
 
     private fun showMessage(message: String) {
-        eventShowMessageText.postValue(message)
+        showMessageText.postValue(message)
     }
 
     private fun hideMessage() {
-        eventShowMessageText.postValue("")
+        showMessageText.postValue("")
     }
 }

@@ -48,7 +48,7 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
     override fun onViewModelSetup() {
         super.onViewModelSetup()
 
-        detailViewModel.eventChangedBookItem.observe(viewLifecycleOwner, {
+        detailViewModel.changedBookItem.observe(viewLifecycleOwner, {
             Dlog.d("item : ${it.name}'s like ${it.isLike}}")
             searchViewModel.changeBookItem(it)
         })
