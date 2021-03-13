@@ -51,7 +51,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
     }
 
     override fun onViewModelSetup() {
-        searchBookViewModel.eventBooks.observe(viewLifecycleOwner, {
+        searchBookViewModel.books.observe(viewLifecycleOwner, {
             bookAdapter.replaceAll(it)
         })
 

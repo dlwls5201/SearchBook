@@ -26,20 +26,21 @@ class SearchBookViewModel(
         }
     }
 
-    val eventEditSearchText = MutableLiveData("")
-    val eventTotalCount = MutableLiveData(0)
+    val editSearchText = MutableLiveData("")
+    val totalCount = MutableLiveData(0)
 
-    val eventBooks = MutableLiveData<List<BookItem>>(emptyList())
+    val books = MutableLiveData<List<BookItem>>(emptyList())
     private val mutableBooks = mutableListOf<BookItem>()
 
     init {
+        Dlog.d("SearchBookViewModel init")
         showKeyboard()
         initAutoSearch()
     }
 
     private fun initAutoSearch() {
         viewModelScope.launch {
-            eventEditSearchText.asFlow()
+            editSearchText.asFlow()
                 .debounce(1000L).collect {
                     Dlog.d("debounce : $it")
                     searchBooks()
@@ -52,7 +53,7 @@ class SearchBookViewModel(
     private var isEndFlag = false
 
     private fun searchBooks() {
-        val query = eventEditSearchText.value ?: return
+        val query = editSearchText.value ?: return
         if (TextUtils.isEmpty(query)) {
             showInitMessage()
             return
@@ -105,7 +106,7 @@ class SearchBookViewModel(
             return
         }
 
-        val query = eventEditSearchText.value ?: return
+        val query = editSearchText.value ?: return
         if (TextUtils.isEmpty(query)) {
             return
         }
@@ -152,7 +153,7 @@ class SearchBookViewModel(
                 return@forEachIndexed
             }
         }
-        eventBooks.postValue(mutableBooks)
+        books.postValue(mutableBooks)
     }
 
     private fun initFlag() {
@@ -168,18 +169,18 @@ class SearchBookViewModel(
     private fun addAndPostBooks(books: List<BookItem>) {
         if (books.isNotEmpty()) {
             mutableBooks.addAll(books)
-            eventBooks.postValue(mutableBooks)
+            this.books.postValue(mutableBooks)
         }
     }
 
     private fun clearItems() {
         showTotalCount(0)
         mutableBooks.clear()
-        eventBooks.postValue(emptyList())
+        books.postValue(emptyList())
     }
 
     private fun showInitMessage() {
-        if (eventBooks.value?.isEmpty() == true) {
+        if (books.value?.isEmpty() == true) {
             showMessageText.postValue("책 이름을 입력하면 자동으로\n검색이 됩니다.😽")
         }
     }
@@ -192,7 +193,7 @@ class SearchBookViewModel(
     }
 
     private fun showTotalCount(count: Int) {
-        eventTotalCount.postValue(count)
+        totalCount.postValue(count)
     }
 
     private fun showLoading() {

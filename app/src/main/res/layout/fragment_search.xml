@@ -28,7 +28,7 @@
             android:imeOptions="actionDone"
             android:inputType="text"
             android:singleLine="true"
-            android:text="@={model.eventEditSearchText}"
+            android:text="@={model.editSearchText}"
             app:layout_constraintEnd_toStartOf="@id/tv_total_count"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/rect_orange_rad_16"
             android:padding="10dp"
-            android:text="@{@string/book_total_count_format(model.eventTotalCount)}"
+            android:text="@{@string/book_total_count_format(model.totalCount)}"
             app:layout_constraintBottom_toBottomOf="@id/et_search"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/et_search"
