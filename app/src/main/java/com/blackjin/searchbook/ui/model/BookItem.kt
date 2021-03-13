@@ -3,11 +3,10 @@ package com.blackjin.searchbook.ui.model
 import android.os.Parcelable
 import com.blackjin.searchbook.data.model.Document
 import kotlinx.parcelize.Parcelize
-import kotlin.math.abs
 
 @Parcelize
 data class BookItem(
-    val id: Int = -1,
+    val id: String = "",
     val totalCount: Int = 0,
     val thumbnail: String = "",
     val name: String = "",
@@ -20,7 +19,17 @@ data class BookItem(
 
     companion object {
 
-        fun getUniqueId(name: String, isbn: String) = abs((name + isbn).hashCode())
+        fun getUniqueId(isbn: String): String {
+            return if (isMultipleISBN(isbn)) {
+                isbn.split(" ").first()
+            } else {
+                isbn
+            }
+        }
+
+        private const val MULTIPLE_ISBN_DIVIDER = " "
+
+        private fun isMultipleISBN(isbn: String) = isbn.contains(MULTIPLE_ISBN_DIVIDER)
     }
 
     override fun toString(): String {
@@ -31,7 +40,7 @@ data class BookItem(
 fun List<Document>.mapToItem() = map { it.mapToItem() }
 
 private fun Document.mapToItem() = BookItem(
-    id = BookItem.getUniqueId(name = title ?: "", isbn = isbn ?: "1"),
+    id = BookItem.getUniqueId(isbn ?: ""),
     thumbnail = thumbnail ?: "",
     name = title ?: "",
     description = contents ?: "",
