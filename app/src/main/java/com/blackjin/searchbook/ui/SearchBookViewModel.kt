@@ -34,7 +34,6 @@ class SearchBookViewModel(
     private val tempBooks = mutableListOf<BookItem>()
 
     init {
-        Dlog.d("SearchBookViewModel init")
         showKeyboard()
         initAutoSearch()
     }
@@ -101,6 +100,12 @@ class SearchBookViewModel(
         }
     }
 
+    private fun initFlag() {
+        page = 1
+        isLoadingFlag = false
+        isEndFlag = false
+    }
+
     fun addNextBooks() {
         Dlog.d("isEndFlag : $isEndFlag, isLoadingFlag : $isLoadingFlag")
         if (isEndFlag || isLoadingFlag) {
@@ -147,26 +152,6 @@ class SearchBookViewModel(
         }
     }
 
-    fun changeBookItem(item: BookItem) {
-        tempBooks.forEachIndexed { index, bookItem ->
-            if (item.id == bookItem.id) {
-                tempBooks[index] = item
-                return@forEachIndexed
-            }
-        }
-        books.postValue(tempBooks)
-    }
-
-    fun goToDetailFragment(bookItem: BookItem) {
-        eventShowDetailFragment.postValue(Event(bookItem))
-    }
-
-    private fun initFlag() {
-        page = 1
-        isLoadingFlag = false
-        isEndFlag = false
-    }
-
     private fun plusPageCount() {
         page++
     }
@@ -182,6 +167,20 @@ class SearchBookViewModel(
         showTotalCount(0)
         tempBooks.clear()
         books.postValue(emptyList())
+    }
+
+    fun changeBookItem(item: BookItem) {
+        tempBooks.forEachIndexed { index, bookItem ->
+            if (item.id == bookItem.id) {
+                tempBooks[index] = item
+                return@forEachIndexed
+            }
+        }
+        books.postValue(tempBooks)
+    }
+
+    fun goToDetailFragment(bookItem: BookItem) {
+        eventShowDetailFragment.postValue(Event(bookItem))
     }
 
     private fun showInitMessage() {

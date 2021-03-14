@@ -7,34 +7,31 @@ import com.blackjin.searchbook.R
 import com.blackjin.searchbook.base.BaseViewHolder
 import com.blackjin.searchbook.databinding.ItemBookBinding
 import com.blackjin.searchbook.ui.model.BookItem
-import com.blackjin.searchbook.utils.Dlog
 
 class BookAdapter : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
     var onItemClick: ((repoItem: BookItem) -> Unit)? = null
 
-    private val items = mutableListOf<BookItem>()
+    private val books = mutableListOf<BookItem>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         BookViewHolder(parent).apply {
             itemView.setOnClickListener {
-                onItemClick?.invoke(items[layoutPosition])
+                onItemClick?.invoke(books[layoutPosition])
             }
         }
 
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(books[position])
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount() = books.size
 
     fun replaceAll(items: List<BookItem>) {
-        Dlog.d("size : ${items.size} -> $items")
-
-        val diffCallback = BookDiffUtilCallback(this.items, items)
+        val diffCallback = BookDiffUtilCallback(books, items)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 
-        this.items.run {
+        books.run {
             clear()
             addAll(items)
         }

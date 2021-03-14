@@ -31,13 +31,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun initFragment() {
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fl_container, SearchFragment.newInstance())
-            .commit()
-    }
-
     override fun onViewModelSetup() {
         super.onViewModelSetup()
         searchBookViewModel.eventShowDetailFragment.observe(this, {
@@ -52,6 +45,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             .beginTransaction()
             .replace(R.id.fl_container, DetailFragment.newInstance(bookItem))
             .addToBackStack(null)
+            .commit()
+    }
+
+    private fun initFragment() {
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fl_container, SearchFragment.newInstance())
             .commit()
     }
 }
