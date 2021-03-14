@@ -19,15 +19,15 @@ data class BookItem(
 
     companion object {
 
+        private const val MULTIPLE_ISBN_DIVIDER = " "
+
         fun getUniqueId(isbn: String): String {
             return if (isMultipleISBN(isbn)) {
-                isbn.split(" ").first()
+                isbn.split(MULTIPLE_ISBN_DIVIDER).first()
             } else {
                 isbn
             }
         }
-
-        private const val MULTIPLE_ISBN_DIVIDER = " "
 
         private fun isMultipleISBN(isbn: String) = isbn.contains(MULTIPLE_ISBN_DIVIDER)
     }
@@ -46,10 +46,10 @@ private fun Document.mapToItem() = BookItem(
     description = contents ?: "",
     publisher = publisher ?: "",
     price = price ?: 0,
-    date = divideDataTimeFromT(datetime)
+    date = divideDateTimeFromT(datetime)
 )
 
-private fun divideDataTimeFromT(date: String?): String {
+private fun divideDateTimeFromT(date: String?): String {
     val firstDate = date?.split("T")?.firstOrNull()
     return firstDate ?: ""
 }

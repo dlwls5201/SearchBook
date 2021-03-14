@@ -13,7 +13,6 @@ import com.blackjin.searchbook.base.BaseFragment
 import com.blackjin.searchbook.databinding.FragmentSearchBinding
 import com.blackjin.searchbook.ext.toast
 import com.blackjin.searchbook.injection.Injection
-import com.blackjin.searchbook.ui.MainActivity
 import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.search.adapter.BookAdapter
 import com.blackjin.searchbook.utils.AppUtils
@@ -25,21 +24,21 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         fun newInstance() = SearchFragment()
     }
 
-    private val bookAdapter by lazy {
-        BookAdapter().apply {
-            onItemClick = { bookItem ->
-                (requireActivity() as MainActivity).goToDetailFragment(bookItem)
-                hideSearchKeyboard()
-            }
-        }
-    }
-
     private val searchBookViewModel by activityViewModels<SearchBookViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 return SearchBookViewModel(
                     Injection.provideSearchRepository()
                 ) as T
+            }
+        }
+    }
+
+    private val bookAdapter by lazy {
+        BookAdapter().apply {
+            onItemClick = { bookItem ->
+                searchBookViewModel.goToDetailFragment(bookItem)
+                hideSearchKeyboard()
             }
         }
     }

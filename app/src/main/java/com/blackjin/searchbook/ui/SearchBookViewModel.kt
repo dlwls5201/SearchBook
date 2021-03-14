@@ -17,6 +17,7 @@ class SearchBookViewModel(
 
     val eventToast = MutableLiveData<Event<String>>()
     val eventShowKeyboard = MutableLiveData<Event<Boolean>>()
+    val eventShowDetailFragment = MutableLiveData<Event<BookItem>>()
 
     val showLoading = MutableLiveData(false)
     val showMessageText = MutableLiveData("")
@@ -30,7 +31,7 @@ class SearchBookViewModel(
     val totalCount = MutableLiveData(0)
 
     val books = MutableLiveData<List<BookItem>>(emptyList())
-    private val mutableBooks = mutableListOf<BookItem>()
+    private val tempBooks = mutableListOf<BookItem>()
 
     init {
         Dlog.d("SearchBookViewModel init")
@@ -147,13 +148,17 @@ class SearchBookViewModel(
     }
 
     fun changeBookItem(item: BookItem) {
-        mutableBooks.forEachIndexed { index, bookItem ->
+        tempBooks.forEachIndexed { index, bookItem ->
             if (item.id == bookItem.id) {
-                mutableBooks[index] = item
+                tempBooks[index] = item
                 return@forEachIndexed
             }
         }
-        books.postValue(mutableBooks)
+        books.postValue(tempBooks)
+    }
+
+    fun goToDetailFragment(bookItem: BookItem) {
+        eventShowDetailFragment.postValue(Event(bookItem))
     }
 
     private fun initFlag() {
@@ -168,14 +173,14 @@ class SearchBookViewModel(
 
     private fun addAndPostBooks(books: List<BookItem>) {
         if (books.isNotEmpty()) {
-            mutableBooks.addAll(books)
-            this.books.postValue(mutableBooks)
+            tempBooks.addAll(books)
+            this.books.postValue(tempBooks)
         }
     }
 
     private fun clearItems() {
         showTotalCount(0)
-        mutableBooks.clear()
+        tempBooks.clear()
         books.postValue(emptyList())
     }
 

@@ -18,7 +18,6 @@ class BookAdapter : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         BookViewHolder(parent).apply {
             itemView.setOnClickListener {
-                //TODO check layoutPosition
                 onItemClick?.invoke(items[layoutPosition])
             }
         }
@@ -51,7 +50,6 @@ class BookAdapter : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
         }
     }
 
-    //TODO check diffUtil
     class BookDiffUtilCallback(
         private val oldList: List<BookItem>, private val newList: List<BookItem>
     ) : DiffUtil.Callback() {

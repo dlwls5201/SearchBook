@@ -6,8 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.blackjin.searchbook.ui.model.BookItem
 
-//TODO check SavedStateHandle
-//https://pluu.github.io/blog/android/2020/02/20/savedstatehandle/
 class DetailViewModel(
     handle: SavedStateHandle
 ) : ViewModel() {
