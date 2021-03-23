@@ -16,6 +16,7 @@ import com.blackjin.searchbook.injection.Injection
 import com.blackjin.searchbook.ui.SearchBookViewModel
 import com.blackjin.searchbook.ui.search.adapter.BookAdapter
 import com.blackjin.searchbook.utils.AppUtils
+import com.blackjin.searchbook.utils.Dlog
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_search) {
 
@@ -43,10 +44,31 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_sea
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        Dlog.d("SearchFragment onResume")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Dlog.d("SearchFragment onCreate")
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Dlog.d("SearchFragment onViewCreated")
         binding.model = searchBookViewModel
         initRecyclerView()
+    }
+
+    override fun onDestroyView() {
+        Dlog.d("SearchFragment onDestroyView")
+        super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        Dlog.d("SearchFragment onDestroy")
+        super.onDestroy()
     }
 
     override fun onViewModelSetup() {

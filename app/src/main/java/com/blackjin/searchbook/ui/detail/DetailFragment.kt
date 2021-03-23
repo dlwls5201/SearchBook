@@ -39,17 +39,38 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
 
     private val detailViewModel by viewModels<DetailViewModel>()
 
+    override fun onResume() {
+        super.onResume()
+        Dlog.d("DetailFragment onResume")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Dlog.d("DetailFragment onCreate")
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Dlog.d("DetailFragment onViewCreated")
         binding.model = detailViewModel
         initButton()
+    }
+
+    override fun onDestroyView() {
+        Dlog.d("DetailFragment onDestroyView")
+        super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        Dlog.d("DetailFragment onDestroy")
+        super.onDestroy()
     }
 
     override fun onViewModelSetup() {
         super.onViewModelSetup()
 
         detailViewModel.changedBookItem.observe(viewLifecycleOwner, {
-            Dlog.d("item : ${it.name}'s like ${it.isLike}}")
+            Dlog.d("item : ${it.name}'s like ${it.isLike}")
             searchViewModel.changeBookItem(it)
         })
     }

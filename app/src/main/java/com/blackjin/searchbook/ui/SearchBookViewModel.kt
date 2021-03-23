@@ -34,7 +34,7 @@ class SearchBookViewModel(
     private val tempBooks = mutableListOf<BookItem>()
 
     init {
-        showKeyboard()
+        //showKeyboard()
         initAutoSearch()
     }
 
