@@ -27,6 +27,8 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
             }
     }
 
+    private val bookItem: BookItem? by lazy { arguments?.getParcelable(ARGUMENT_BOOK_ITEM) }
+
     private val searchViewModel by activityViewModels<SearchBookViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -41,36 +43,34 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(R.layout.fragment_det
 
     override fun onResume() {
         super.onResume()
-        Dlog.d("DetailFragment onResume")
+        Dlog.d("DetailFragment${bookItem?.name} onResume")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Dlog.d("DetailFragment onCreate")
+        Dlog.d("DetailFragment${bookItem?.name} onCreate")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Dlog.d("DetailFragment onViewCreated")
+        Dlog.d("DetailFragment${bookItem?.name} onViewCreated")
         binding.model = detailViewModel
         initButton()
     }
 
     override fun onDestroyView() {
-        Dlog.d("DetailFragment onDestroyView")
+        Dlog.d("DetailFragment${bookItem?.name} onDestroyView")
         super.onDestroyView()
     }
 
     override fun onDestroy() {
-        Dlog.d("DetailFragment onDestroy")
+        Dlog.d("DetailFragment${bookItem?.name} onDestroy")
         super.onDestroy()
     }
 
     override fun onViewModelSetup() {
         super.onViewModelSetup()
-
         detailViewModel.changedBookItem.observe(viewLifecycleOwner, {
-            Dlog.d("item : ${it.name}'s like ${it.isLike}")
             searchViewModel.changeBookItem(it)
         })
     }

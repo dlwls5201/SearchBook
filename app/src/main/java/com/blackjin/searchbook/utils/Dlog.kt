@@ -14,6 +14,12 @@ object Dlog {
         }
     }
 
+    fun d(tag: String?, msg: String?) {
+        if (isDebug()) {
+            Log.d(tag, buildLogMsg(msg))
+        }
+    }
+
     //info
     fun i(msg: String?) {
         if (isDebug()) {
@@ -55,9 +61,6 @@ object Dlog {
 
     private fun buildLogMsg(msg: String?): String {
         val sb = StringBuilder()
-        if (TAG.isNotEmpty()) {
-            sb.append("[").append(TAG).append("] ")
-        }
 
         if (msg.isNullOrEmpty().not()) {
             sb.append(msg)

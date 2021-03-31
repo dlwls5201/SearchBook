@@ -3,6 +3,7 @@ package com.blackjin.searchbook.ui
 import android.os.Bundle
 import android.os.Handler
 import androidx.activity.viewModels
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.blackjin.searchbook.R
@@ -16,6 +17,10 @@ import com.blackjin.searchbook.utils.Dlog
 
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
+    private val TAG_LIFE_CYCLE = "lifecycle"
+
+    private val TAG_NAME = "blacjin"
+
     private val searchBookViewModel by viewModels<SearchBookViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -28,10 +33,49 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
-            initFragment()
-            intButton()
-        }
+        Dlog.d(TAG_LIFE_CYCLE, "onCreate savedInstanceState : $savedInstanceState")
+        initFragment()
+        intButton()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Dlog.d(TAG_LIFE_CYCLE, "onRestart")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Dlog.d(TAG_LIFE_CYCLE, "onStart")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        Dlog.d(TAG_LIFE_CYCLE, "onRestoreInstanceState savedInstanceState : $savedInstanceState")
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Dlog.d(TAG_LIFE_CYCLE, "onResume")
+    }
+
+    override fun onPause() {
+        Dlog.d(TAG_LIFE_CYCLE, "onPause")
+        super.onPause()
+    }
+
+    override fun onStop() {
+        Dlog.d(TAG_LIFE_CYCLE, "onStop")
+        super.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        Dlog.d(TAG_LIFE_CYCLE, "onSaveInstanceState outState : $outState")
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        Dlog.d(TAG_LIFE_CYCLE, "onDestroy")
+        super.onDestroy()
     }
 
     private var flag = 0
@@ -41,18 +85,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             btn1.setOnClickListener {
                 initFragment()
             }
+
             btn2.setOnClickListener {
                 Dlog.d("fragments : ${supportFragmentManager.fragments.size}")
-                //supportFragmentManager.popBackStack("blackjin", 0)
-                //supportFragmentManager.popBackStack("blackjin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                //supportFragmentManager.popBackStack("test", 0)
+                supportFragmentManager.popBackStack("test", FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
                 Handler().postDelayed({
                     Dlog.d("fragments : ${supportFragmentManager.fragments.size}")
                     Dlog.d("backStackEntryCount : ${supportFragmentManager.backStackEntryCount}")
                     val findFragment = supportFragmentManager.findFragmentById(R.id.fl_container)
+                    val tagFragment = supportFragmentManager.findFragmentByTag(TAG_NAME)
                     Dlog.d("findFragment : $findFragment")
+                    Dlog.d("tagFragment : $tagFragment")
                 }, 500)
             }
+
             btn3.setOnClickListener {
                 flag++
                 val bookItem = BookItem(
@@ -78,15 +126,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private fun goToDetailFragment(bookItem: BookItem) {
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.fl_container, DetailFragment.newInstance(bookItem))
-            .addToBackStack(null)
+            .add(R.id.fl_container, DetailFragment.newInstance(bookItem), TAG_NAME)
+            .addToBackStack("test")
             .commit()
     }
 
     private fun initFragment() {
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.fl_container, SearchFragment.newInstance())
+            .add(R.id.fl_container, SearchFragment.newInstance())
+            .addToBackStack(null)
             .commit()
     }
 }

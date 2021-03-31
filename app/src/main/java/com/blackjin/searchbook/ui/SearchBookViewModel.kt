@@ -42,7 +42,6 @@ class SearchBookViewModel(
         viewModelScope.launch {
             editSearchText.asFlow()
                 .debounce(1000L).collect {
-                    Dlog.d("debounce : $it")
                     searchBooks()
                 }
         }
